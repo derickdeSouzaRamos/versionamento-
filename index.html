@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Cálculo de Média com Descarte</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <h1>Calculadora de Média (Descarta a menor nota)</h1>
+
+  <div class="caixa">
+    <div id="inputs"></div>
+
+    <button id="novaNota">+ Adicionar Nota</button>
+    <button onclick="calcular()">Calcular Média</button>
+
+    <div id="resultado"></div>
+  </div>
+
+  <script>
+    // --- Criação dos campos de nota ---
+    const inputsDiv = document.getElementById("inputs");
+    let totalNotas = 0;
+
+    function adicionarCampo() {
+      totalNotas = totalNotas + 1;
+
+      const linha = document.createElement("div");
+      linha.className = "nota";
+
+      const label = document.createElement("label");
+      label.textContent = "Nota " + totalNotas + ":";
+
+      const input = document.createElement("input");
+      input.type = "number";
+      input.min = "0";
+      input.max = "10";
+      input.step = "any";
+      input.id = "nota" + totalNotas;
+
+      linha.appendChild(label);
+      linha.appendChild(input);
+      inputsDiv.appendChild(linha);
+    }
+
+    // adiciona 3 campos por padrão
+    for (let i = 0; i < 3; i++) {
+      adicionarCampo();
+    }
+
+    document.getElementById("novaNota").onclick = adicionarCampo;
+
+    // --- Função principal ---
+    function calcular() {
+      const notas = [];
+      let indice = 0;
+
+      for (let i = 1; i <= totalNotas; i++) {
+        const campo = document.getElementById("nota" + i);
+        const valor = Number(campo.value);
+
+        // substitui isNaN com checagem direta
+        if (valor !== valor) { 
+          document.getElementById("resultado").innerHTML = "⚠️ Digite apenas números válidos.";
+          return;
+        }
+
+        if (valor >= 0) {
+          notas[indice] = valor;
+          indice = indice + 1;
+        }
+      }
+
+      if (notas.length < 2) {
+        document.getElementById("resultado").innerHTML = "⚠️ Digite pelo menos duas notas.";
+        return;
+      }
+
+      calcularMediaComDescarte(notas);
+    }
+
+    function calcularMediaComDescarte(notas) {
+      // Encontrar menor nota
+      let menor = notas[0];
+      for (let i = 1; i < notas.length; i++) {
+        if (notas[i] < menor) {
+          menor = notas[i];
+        }
+      }
+
+      // Criar novo array manualmente (sem push)
+      const notasRestantes = [];
+      let removido = false;
+      let contador = 0;
+
+      for (let i = 0; i < notas.length; i++) {
+        if (notas[i] === menor && !removido) {
+          removido = true;
+        } else {
+          notasRestantes[contador] = notas[i];
+          contador = contador + 1;
+        }
+      }
+
+      // Calcular média
+      let soma = 0;
+      for (let i = 0; i < notasRestantes.length; i++) {
+        soma = soma + notasRestantes[i];
+      }
+
+      const media = soma / notasRestantes.length;
+
+      // Classificação
+      let classificacao = "";
+      if (media >= 7) classificacao = "✅ Aprovado";
+      else if (media >= 5) classificacao = "⚠️ Recuperação";
+      else classificacao = "❌ Reprovado";
+
+      // Exibir resultados
+      let textoNotas = "";
+      for (let i = 0; i < notas.length; i++) {
+        textoNotas = textoNotas + notas[i];
+        if (i < notas.length - 1) textoNotas = textoNotas + ", ";
+      }
+
+      document.getElementById("resultado").innerHTML =
+        "<strong>Notas informadas:</strong> " + textoNotas + "<br>" +
+        "<strong>Nota descartada:</strong> " + menor + "<br>" +
+        "<strong>Média final:</strong> " + media + "<br>" +
+        "<strong>Classificação:</strong> " + classificacao;
+    }
+  </script>
+
+</body>
+</html>
